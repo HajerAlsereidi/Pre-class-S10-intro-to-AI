@@ -1,0 +1,70 @@
+class FineDiningReservation:
+    def __init__(self, tables, reservations):
+        self.tables = tables  # Tables with their capacities
+        self.reservations = reservations  # List of reservations (time & guests)
+        self.assigned_tables = {}  # Stores assigned reservations
+
+    def is_valid(self, reservation, table):
+        time, guests = reservation
+
+        # Check if table is already booked at the same time
+        for assigned_res, assigned_table in self.assigned_tables.items():
+            assigned_time, _ = assigned_res
+            if assigned_time == time and assigned_table == table:
+                return False  # Table already booked
+
+        # Check if table has enough space
+        if self.tables[table] < guests:
+            return False  # Not enough capacity
+
+        return True  # Table is valid
+
+    def assign_tables(self, index=0):
+        if index == len(self.reservations):  # All reservations assigned
+            return True
+
+        res = self.reservations[index]
+
+        for table in self.tables:
+            if self.is_valid(res, table):
+                self.assigned_tables[res] = table  # Assign table
+
+                if self.assign_tables(index + 1):  # Continue to next reservation
+                    return True
+
+                del self.assigned_tables[res]  # Undo assignment (backtrack)
+
+        return False  # No valid assignment found
+
+    def print_solution(self):
+        if not self.assigned_tables:
+            print("No valid table arrangement found!")
+            return
+
+        print("Fine Dining Table Assignments:")
+        for res, table in self.assigned_tables.items():
+            print("Reservation at", res[0], "for", res[1], "guests -> Assigned", table)
+
+
+# Define available tables (Table Name: Maximum Guests)
+tables = {
+    "Table1": 2,
+    "Table2": 4,
+    "Table3": 6
+}
+
+# Define reservations (Time, Number of Guests)
+reservations = [
+    ("7:00 PM", 2),
+    ("7:30 PM", 4),
+    ("8:00 PM", 6),
+    ("8:30 PM", 2)
+]
+
+# Solve the reservation problem
+reservation_system = FineDiningReservation(tables, reservations)
+
+if reservation_system.assign_tables():
+    reservation_system.print_solution()
+else:
+    print("No valid table arrangement found!")
